@@ -21,17 +21,27 @@
 #include "logger.h"
 #include "lnurl.h"
 #include "modules.h"
+#include "sdcard.h"
 
 void setup() {
 	Serial.begin(115200);
 	logger::enable();
-	config::init();
+	if ( sdcard::open() < 0 ) {
+	    printf("SD card failed to open, setting default config.\n");
+	    // config::setDefault();
+	} else {
+	    printf("Setting config from the SD card.\n");
+	    config::setConfig(sdcard::getIFStream());
+	}
+	sdcard::close();
 	logger::write("Config OK");
+	config::init();
+
 	display::init();
-	display::updateAmount(0.00, config::fiatCurrency);
+	display::updateAmount(0.00, config::getFiatCurrency());
 	logger::write("Display OK");
 	coinAcceptor::init();
-	coinAcceptor::setFiatCurrency(config::fiatCurrency);
+	coinAcceptor::setFiatCurrency(config::getFiatCurrency());
 	logger::write("Coin Reader OK");
 	logger::write("Setup OK");
 }
@@ -42,6 +52,8 @@ const unsigned long minWaitTimeSinceInsertedFiat = 15000;// milliseconds
 const unsigned long maxTimeDisplayQrCode = 120000;// milliseconds
 
 void loop() {
+  // sdcard::debug();
+
 	if (millis() - bootTime >= minWaitAfterBootTime) {
 		// Minimum time has passed since boot.
 		// Start performing checks.
@@ -63,16 +75,16 @@ void loop() {
 			// Create a withdraw request and render it as a QR code.
 			std::string req = lnurl::create_signed_withdraw_request(
 				accumulatedValue,
-				config::fiatCurrency,
-				config::apiKeyId,
-				config::apiKeySecret,
-				config::callbackUrl
+				config::getFiatCurrency(),
+				config::getApiKeyId(),
+				config::getApiKeySecret(),
+				config::getCallbackUrl()
 			);
 			display::renderQRCode("lightning:" + req);
 			coinAcceptor::reset();
 		}
 		if (!display::hasRenderedQRCode() && display::getRenderedAmount() != accumulatedValue) {
-			display::updateAmount(accumulatedValue, config::fiatCurrency);
+		    display::updateAmount(accumulatedValue, config::getFiatCurrency());
 		}
 	}
 }
