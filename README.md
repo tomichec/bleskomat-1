@@ -126,6 +126,18 @@ Have a look at the [wiring diagram](#wiring-diagram) above or the table of cable
 | GPIO18 (D18) | CLK (SCK)  |
 | 3.3V (3V3)   | LED (NC)   |
 
+#### Wiring the SD card
+
+The TTF display we are using contain a SD card module. The pins are located above the screen and not soldered to the module by default but the pins can be added. The table of mappings is the following:
+
+|  ESP32       | TFT        |
+|--------------|------------|
+|  GPIO2  (D2) |  SD_MISO   |
+|  GPIO15 (D15)|  SD_MOSI   |
+|  GPIO14 (D14)|  SD_SCK    |
+|  GPIO13 (D13)|  SD_CS     |
+
+
 
 #### Wiring the Coin Acceptor
 
