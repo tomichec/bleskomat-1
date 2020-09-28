@@ -28,6 +28,8 @@
 DEVICE=./device
 SERVER=./server
 
+CONFIG=$(SERVER)/config.json
+
 ## Targets
 #
 # The format goes:
@@ -66,6 +68,12 @@ monitor:
 
 server:
 	cd $(SERVER) && npm start
+
+bleskomat.conf: $(CONFIG)
+	jq -r '.lnurl.auth.apiKeys[0].id' $< > $@
+	jq -r '.lnurl.auth.apiKeys[0].key' $< >> $@
+	echo `jq -r '.lnurl.url' $<``jq -r '.lnurl.endpoint' $<` >> $@
+	jq -r '.fiatCurrency' $< >> $@
 
 signedLnurl:
 	cd $(SERVER) && npm run --silent generate:signedLnurl -- "${AMOUNT}"
