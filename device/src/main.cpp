@@ -15,8 +15,11 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <Arduino.h>
+
 #include "config.h"
-#include "display.h"
+// #include "display.h"
+#include "eink.h"
 #include "logger.h"
 #include "modules.h"
 #include "util.h"
@@ -28,9 +31,11 @@ void setup() {
 	logger::enable();
 	config::init();
 	logger::write("Config OK");
-	display::init();
-	display::updateAmount(0.00, config::fiatCurrency);
-	logger::write("Display OK");
+
+	eink::init();
+	eink::updateAmount(0.00, config::fiatCurrency);
+	logger::write("Eink OK");
+
 	coinAcceptor::init();
 	coinAcceptor::setFiatCurrency(config::fiatCurrency);
 	logger::write("Coin Reader OK");
@@ -47,12 +52,12 @@ void loop() {
 		// Minimum time has passed since boot.
 		// Start performing checks.
 		coinAcceptor::loop();
-		if (display::getTimeSinceRenderedQRCode() >= maxTimeDisplayQrCode) {
+		if (eink::getTimeSinceRenderedQRCode() >= maxTimeDisplayQrCode) {
 			// Automatically clear the QR code from the screen after some time has passed.
-			display::clearQRCode();
-		} else if (coinAcceptor::coinInserted() && display::hasRenderedQRCode()) {
+			eink::clearQRCode();
+		} else if (coinAcceptor::coinInserted() && eink::hasRenderedQRCode()) {
 			// Clear the QR code when new coins are inserted.
-			display::clearQRCode();
+			eink::clearQRCode();
 		}
 		float accumulatedValue = coinAcceptor::getAccumulatedValue();
 		if (
@@ -63,11 +68,11 @@ void loop() {
 			// Create a withdraw request and render it as a QR code.
 			const std::string req = util::createSignedWithdrawRequest(accumulatedValue);
 			// Convert to uppercase because it reduces the complexity of the QR code.
-			display::renderQRCode("LIGHTNING:" + util::toUpperCase(req));
+			eink::renderQRCode("LIGHTNING:" + util::toUpperCase(req));
 			coinAcceptor::reset();
 		}
-		if (!display::hasRenderedQRCode() && display::getRenderedAmount() != accumulatedValue) {
-			display::updateAmount(accumulatedValue, config::fiatCurrency);
+		if (!eink::hasRenderedQRCode() && eink::getRenderedAmount() != accumulatedValue) {
+		    eink::updateAmount(accumulatedValue, config::fiatCurrency);
 		}
 	}
 }
