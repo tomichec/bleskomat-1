@@ -62,10 +62,12 @@
 
 // #include "bitmaps/Bitmaps128x296.h" // 2.9"  b/w
 
-#ifdef EINK_200x200
+#if defined EINK_200x200
 #include "modules/bleskomat_200x200.h" // 1.54" b/w
-#else  // if EINK_128x296
+#elif defined EINK_128x296
 #include "modules/bleskomat_128x296.h" // 2.9"  b/w
+#else	// EINK_400x300
+#include "modules/bleskomat_400x300.h" // 4.2"  b/w
 #endif
 
 namespace eink {

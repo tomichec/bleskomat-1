@@ -54,16 +54,18 @@ namespace eink {
 #define EINK_BUSY 25 // BUSY -> 25
 #endif
 
+#endif
+
 /* ******************** */
 /* Bleskomat displays */
-#ifdef EINK_200x200
+#if defined EINK_200x200
 /* - for the 1.54 inch display use */
 	GxEPD2_BW<GxEPD2_154, GxEPD2_154::HEIGHT> display(
 		GxEPD2_154(/*CS=*/  EINK_CS, 
 				   /*DC=*/ 	EINK_DC, 
 				   /*RST=*/	EINK_RST,
 				   /*BUSY=*/EINK_BUSY)); // GDEP015OC1 no longer available
-#else // if EINK_128x296
+#elif defined EINK_128x296
 /* - for the 2.9 inch display use */
 	// GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> display(GxEPD2_290(/*CS=*/ 15, /*DC=*/ 27, /*RST=*/ 26, /*BUSY=*/ 25));
 	GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> display(
@@ -71,9 +73,14 @@ namespace eink {
 				   /*DC=*/   EINK_DC, 
 				   /*RST=*/  EINK_RST, 
 				   /*BUSY=*/ EINK_BUSY));
-
-#endif
-
+#else // EINK_400x300
+/* - for the 4.2 inch display use */
+//GxEPD2_BW<GxEPD2_420, GxEPD2_420::HEIGHT> display(GxEPD2_420(/*CS=*/ 15, /*DC=*/ 27, /*RST=*/ 26, /*BUSY=*/ 25));
+	GxEPD2_BW<GxEPD2_420, GxEPD2_420::HEIGHT> display(
+		GxEPD2_420(/*CS=*/   EINK_CS, 
+				   /*DC=*/   EINK_DC, 
+				   /*RST=*/  EINK_RST, 
+				   /*BUSY=*/ EINK_BUSY));
 #endif
 
 	unsigned long LAST_RENDERED_QRCODE_TIME = 0;
@@ -114,10 +121,12 @@ namespace eink {
 	void drawLogo()
 	{
 		Serial.println("Drawing Bleskomat logo of the required size.");
-#ifdef EINK_200x200
+#if defined EINK_200x200
 #define bleskomat_logo bleskomat_200x200
-#else// if EINK_128x296
+#elif defined EINK_128x296
 #define bleskomat_logo bleskomat_128x296
+#else // EINK_400x300
+#define bleskomat_logo bleskomat_400x300
 #endif
 
 #if !defined(__AVR)
@@ -134,10 +143,12 @@ namespace eink {
 #undef bleskomat_logo
 
 
-#ifdef EINK_200x200
+#if defined EINK_200x200
 		if ((display.epd2.panel == GxEPD2::GDEP015OC1) || (display.epd2.panel == GxEPD2::GDEH0154D67))
-#else// if EINK_128x296
+#elif defined EINK_128x296
 			if (display.epd2.panel == GxEPD2::GDEH029A1)
+#else
+			if (display.epd2.panel == GxEPD2::GDEW042T2)
 #endif
 			{
 				bool m = display.mirror(true);
